@@ -7,6 +7,7 @@ using NPoco;
 using NPoco.FluentMappings;
 using TestCode.Entities;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace TestCode
 {
@@ -34,6 +35,15 @@ namespace TestCode
       services.AddScoped<IUserService, UserService>();
       services.AddScoped<IVehicleService, VehicleService>();
 
+      // var allowedOrigins = Configuration.GetSection("AllowedOrigins").Get<List<string>>().ToArray();
+      // services.AddCors(options =>
+      // {
+      //   options.AddPolicy("TestCode",
+      //       builder => builder.AllowAnyOrigin()
+      //       .AllowAnyMethod()
+      //       .AllowAnyHeader());
+      // });
+
       //   services.AddSwaggerGen(c =>
       //   {
       //     c.SwaggerDoc("v1", new Info { Title = "API", Version = "v1" });
@@ -52,12 +62,12 @@ namespace TestCode
 
       app.UseRouting();
 
-      app.UseAuthorization();
-
       app.UseEndpoints(endpoints =>
       {
         endpoints.MapControllers();
       });
+
+      // app.UseCors("TestCode");
 
       //   app.UseSwagger();
       //   app.UseSwaggerUI(c =>
