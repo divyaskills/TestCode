@@ -20,7 +20,8 @@ namespace TestCode.Services
     {
       try
       {
-        var paging = "OFFSET @0 ROWS FETCH NEXT @1 ROWS ONLY";
+        var paging = string.Empty;
+        // var paging = "OFFSET @0 ROWS FETCH NEXT @1 ROWS ONLY";
         long sourceId = 0;
         long destinationId = 0;
         var seatCountSubQuery = string.Empty;
@@ -69,8 +70,10 @@ namespace TestCode.Services
                         (select [Name] from [dbo].[cities] where id={destinationId}) as [EndPoint],
                         jd.sourceArrival as PickupPointArrival,
                         jd.destinationArrival as EndPointArrival,
-                        (select count(id) from [dbo].[SeatAvailability] where [VehicleId]=v.id and [IsAllocated]=0) as seatAvailabilityCount 
-                        from dbo.Vehicles v right join journeyData jd on v.Id=jd.VehicleId";
+                        (select count(id) from [dbo].[SeatAvailability] where [VehicleId]=v.id and [IsAllocated]=0) as SeatAvailabilityCount 
+                        from dbo.Vehicles v right join journeyData jd on v.Id=jd.VehicleId
+                        {seatCountSubQuery}
+                        ";
 
         var result = await _db.QueryAsync<VehicleModel>(
                   $"{query} {paging}",
@@ -83,6 +86,60 @@ namespace TestCode.Services
       catch (Exception ex)
       {
         // log here
+        return null;
+      }
+    }
+
+    public async Task<IEnumerable<VehicleDetailModel>> GetVehicleDetailsAsync(long vehicleId)
+    {
+      try
+      {
+        var condition = string.Empty;
+        if (vehicleId != 0)
+        {
+          condition = "where VehicleId=" + vehicleId;
+        }
+
+        var query = $@"
+                select jr.Id, v.[Name] as VehicleName, jr.ArrivalAt as ArrivalTime, jr.DisplayIndex as ArrivalIndex, jr.CityId as CityId, c.[Name] as CityName
+                from dbo.JourneyRoutes jr left join dbo.cities c on c.Id=jr.CityId left join dbo.vehicles v on v.id=jr.VehicleId 
+                {condition}
+        ";
+        var result = await _db.QueryAsync<VehicleDetailModel>(query);
+        return result;
+      }
+      catch (Exception ex)
+      {
+        return null;
+      }
+    }
+
+    public async Task<IEnumerable<UsreBookingModel>> GetUserBookingsAsync(long userId)
+    {
+      try
+      {
+        var condition = string.Empty;
+        if (userId != 0)
+        {
+          condition = "where ub.UserId=" + userId;
+        }
+
+        var query = $@"
+                select ub.id, v.Name as VehicleName, 
+                (select [name] from cities where id=r.SourceId) as SourceCity,
+                (select [name] from cities where id=r.DestinationId) as DestinationCity,
+
+                (select [name] from cities where id=v.SourceId) as OriginalRouteFrom,
+                (select [name] from cities where id=v.DestinationId) as OriginalRouteTo
+
+                from [dbo].UserBookings ub left join [dbo].[routes] r on ub.RouteId=r.Id left join [dbo].Vehicles v on v.id=ub.VehicleId
+                {condition}
+        ";
+        var result = await _db.QueryAsync<UsreBookingModel>(query);
+        return result;
+      }
+      catch (Exception ex)
+      {
         return null;
       }
     }

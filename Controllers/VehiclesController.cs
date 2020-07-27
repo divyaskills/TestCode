@@ -60,13 +60,77 @@ namespace TestCode.Controllers
     /// <remarks></remarks>
     /// <response code="200">Success</response>
     /// <response code="400">Invalid values</response>
+    [HttpGet("vehicledetails/{id}")]
+    public async Task<ActionResult<VehicleDetailModel>> GetVehicleDetails(long id)
+    {
+      try
+      {
+        ResponseModel model = new ResponseModel();
+        model.Data = await _vehicleService.GetVehicleDetailsAsync(id);
+        if (model.Data == null)
+        {
+          model.ResponseType = "Error";
+          model.Message = "Oops! Something went wrong";
+        }
+        else
+        {
+          model.ResponseType = "Sucess";
+        }
+
+        return Ok(model);
+      }
+      catch (Exception ex)
+      {
+        // add serilog here
+        return BadRequest();
+      }
+    }
+
+    /// <summary>
+    /// It returns all cities data.
+    /// </summary>
+    /// <remarks></remarks>
+    /// <response code="200">Success</response>
+    /// <response code="400">Invalid values</response>
+    [HttpGet("userBookings/{id}")]
+    public async Task<ActionResult<UsreBookingModel>> GetUserBookings(long id)
+    {
+      try
+      {
+        ResponseModel model = new ResponseModel();
+        model.Data = await _vehicleService.GetUserBookingsAsync(id);
+        if (model.Data == null)
+        {
+          model.ResponseType = "Error";
+          model.Message = "Oops! Something went wrong";
+        }
+        else
+        {
+          model.ResponseType = "Sucess";
+        }
+
+        return Ok(model);
+      }
+      catch (Exception ex)
+      {
+        // add serilog here
+        return BadRequest();
+      }
+    }
+
+    /// <summary>
+    /// It returns all cities data.
+    /// </summary>
+    /// <remarks></remarks>
+    /// <response code="200">Success</response>
+    /// <response code="400">Invalid values</response>
     [HttpGet("cities")]
     public async Task<ActionResult<VehicleModel>> GetCityList()
     {
       try
       {
         ResponseModel model = new ResponseModel();
-        model.Data = await _vehicleService.GetListAsync(filter);
+        model.Data = await _vehicleService.GetListAsync();
         if (model.Data == null)
         {
           model.ResponseType = "Error";
